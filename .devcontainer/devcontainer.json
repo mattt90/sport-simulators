@@ -1,0 +1,20 @@
+{
+    "name": "Love 2d Game",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "features": {
+        "ghcr.io/prulloac/devcontainer-features/lua:1": {}
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "tomblind.local-lua-debugger-vscode"
+            ]
+        }
+    },
+    "remoteUser": "vscode",
+    "containerEnv": {
+        "DISPLAY": "host.docker.internal:0"
+    }
+}
