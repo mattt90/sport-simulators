@@ -17,7 +17,6 @@ local dragOffsetX, dragOffsetY = 0, 0
 
 local suits = {"S", "H", "D", "C"}
 local ranks = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"}
-local cardImages = {}
 local deck = {}
 local tableau = {}
 local foundations = {{}, {}, {}, {}}
@@ -26,29 +25,15 @@ local waste = {}
 
 local CARD_WIDTH, CARD_HEIGHT = 80, 120
 
--- Load card images
-local function loadCardImages()
-	for _, suit in ipairs(suits) do
-		for _, rank in ipairs(ranks) do
-			local key = rank .. suit
-			local path = "src/cards/" .. key .. ".png"
-			local ok, img = pcall(love.graphics.newImage, path)
-			if ok then
-				cardImages[key] = img
-			else
-				-- Placeholder: draw rectangle if image missing
-				cardImages[key] = false
-			end
-		end
-	end
-end
-
 -- Create and shuffle deck
 local function createDeck()
 	local d = {}
 	for _, suit in ipairs(suits) do
 		for _, rank in ipairs(ranks) do
-			table.insert(d, {rank=rank, suit=suit, faceup=false})
+			local key = rank .. suit
+			local path = "cards/" .. key .. ".png"
+			local img = love.graphics.newImage( path)
+			table.insert(d, {rank=rank, suit=suit, faceup=false, front=img})
 		end
 	end
 	-- Shuffle
@@ -76,18 +61,10 @@ local function dealSolitaire()
 	log("Dealt cards to tableau.")
 end
 
-function love.load()
-	love.window.setTitle("Solitaire")
-	love.window.setMode(900, 700)
-	loadCardImages()
-	deck = createDeck()
-	dealSolitaire()
-	log("Game started. Deck created and dealt.")
-end
-
 -- Draw a card (image or placeholder)
 local function drawCard(card, x, y)
 	if not card.rank or not card.suit then
+		--log("Drawing card back: ")
 		-- Draw a generic card back
 		love.graphics.setColor(0.2,0.2,0.7)
 		love.graphics.rectangle("fill", x, y, CARD_WIDTH, CARD_HEIGHT)
@@ -98,18 +75,11 @@ local function drawCard(card, x, y)
 		love.graphics.setColor(1,1,1)
 		return
 	end
-	local key = card.rank .. card.suit
+
 	if card.faceup then
-		if cardImages[key] then
-			love.graphics.draw(cardImages[key], x, y, 0, CARD_WIDTH/140, CARD_HEIGHT/190)
-		else
-			love.graphics.setColor(1,1,1)
-			love.graphics.rectangle("fill", x, y, CARD_WIDTH, CARD_HEIGHT)
-			love.graphics.setColor(0,0,0)
-			love.graphics.rectangle("line", x, y, CARD_WIDTH, CARD_HEIGHT)
-			love.graphics.printf(key, x, y+CARD_HEIGHT/2-8, CARD_WIDTH, "center")
-		end
+		love.graphics.draw(card.front, x, y, 0, CARD_WIDTH/140, CARD_HEIGHT/190)
 	else
+		-- draw card back
 		love.graphics.setColor(0.2,0.2,0.7)
 		love.graphics.rectangle("fill", x, y, CARD_WIDTH, CARD_HEIGHT)
 		love.graphics.setColor(0,0,0)
@@ -118,6 +88,18 @@ local function drawCard(card, x, y)
 		love.graphics.printf("?", x, y+CARD_HEIGHT/2-8, CARD_WIDTH, "center")
 	end
 	love.graphics.setColor(1,1,1)
+end
+
+function love.load()
+	love.window.setTitle("Solitaire")
+	love.window.setMode(900, 700)
+	deck = createDeck()
+	dealSolitaire()
+	log("Game started. Deck created and dealt.")
+end
+
+function love.update(dt)
+	-- Update game state if needed
 end
 
 function love.draw()
@@ -163,15 +145,10 @@ function love.draw()
 			drawCard(draggedCard, mx - dragOffsetX, my - dragOffsetY)
 		end
 	end
+
+	local x, y = love.mouse.getPosition()
+	love.graphics.print("("..x..", "..y..")", x, y)
 end
-
-
--- Dragging state
-local dragging = false
-local draggedCard = nil
-local draggedFrom = nil -- {type="tableau"/"waste", pile=idx, index=cardIdx}
-local draggedStack = nil -- for tableau stack dragging
-local dragOffsetX, dragOffsetY = 0, 0
 
 -- Helper: check if (mx, my) is over a card
 local function cardAtPosition(mx, my)
@@ -360,7 +337,9 @@ function love.mousereleased(x, y, button)
 end
 
 function love.mousemoved(x, y, dx, dy)
-	-- No-op, but could be used for hover effects
+    log("Mouse moved to: " .. x .. ", " .. y)
+	love.graphics.print('Hello World!', x, y)
+	if dragging then
+		-- Card position will follow mouseX, mouseY in love.draw
+	end
 end
-
--- (drawDraggedCard and patching love.draw are now merged into love.draw above)
