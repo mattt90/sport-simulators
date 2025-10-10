@@ -105,7 +105,14 @@ function love.draw()
 	end
 	-- Draw waste
 	if #waste > 0 then
-		drawCard(waste[#waste], 40 + CARD_WIDTH + 20, 40)
+		if dragging and draggedFrom and draggedFrom.type == "waste" then
+			-- skip drawing top waste card if being dragged
+			if #waste > 1 then
+				drawCard(waste[#waste - 1], 40 + CARD_WIDTH + 20, 40)
+			end
+		else
+			drawCard(waste[#waste], 40 + CARD_WIDTH + 20, 40)
+		end
 	end
 	-- Draw foundations
 	for i = 1, 4 do
