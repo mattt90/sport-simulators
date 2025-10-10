@@ -89,12 +89,12 @@ end
 function love.draw()
 	-- Draw tableau
 	for i = 1, 7 do
+		local isDragged = false
 		for j, card in ipairs(tableau[i]) do
-			local isDragged = false
-			if dragging and draggedCard == card and draggedFrom and draggedFrom.type == "tableau" and draggedFrom.pile == i and draggedFrom.index == j then
+			if not isDragged and dragging and draggedCard == card and draggedFrom and draggedFrom.type == "tableau" and draggedFrom.pile == i and draggedFrom.index == j then
 				isDragged = true
 			end
-			if not isDragged then
+			if not isDragged and not isDragged then
 				drawCard(card, 40 + (CARD_WIDTH+20)*(i-1), 200 + 30*(j-1))
 			end
 		end
