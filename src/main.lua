@@ -5,7 +5,6 @@ local function log(msg)
 	print("[LOG] " .. tostring(msg))
 end
 
-
 -- Place card images in src/cards/ as 'AS.png', '2S.png', ..., 'KH.png', etc.
 
 -- Dragging state (must be above love.draw)
@@ -63,19 +62,6 @@ end
 
 -- Draw a card (image or placeholder)
 local function drawCard(card, x, y)
-	if not card.rank or not card.suit then
-		--log("Drawing card back: ")
-		-- Draw a generic card back
-		love.graphics.setColor(0.2,0.2,0.7)
-		love.graphics.rectangle("fill", x, y, CARD_WIDTH, CARD_HEIGHT)
-		love.graphics.setColor(0,0,0)
-		love.graphics.rectangle("line", x, y, CARD_WIDTH, CARD_HEIGHT)
-		love.graphics.setColor(1,1,1)
-		love.graphics.printf("", x, y+CARD_HEIGHT/2-8, CARD_WIDTH, "center")
-		love.graphics.setColor(1,1,1)
-		return
-	end
-
 	if card.faceup then
 		love.graphics.draw(card.front, x, y, 0, CARD_WIDTH/140, CARD_HEIGHT/190)
 	else
@@ -91,8 +77,6 @@ local function drawCard(card, x, y)
 end
 
 function love.load()
-	love.window.setTitle("Solitaire")
-	love.window.setMode(900, 700)
 	deck = createDeck()
 	dealSolitaire()
 	log("Game started. Deck created and dealt.")
@@ -188,49 +172,49 @@ end
 
 function love.mousepressed(x, y, button)
 	if button == 1 and not dragging then
-		   -- Check if click is on stock pile
-		   local stockX, stockY = 40, 40
-		   if button == 1 and x >= stockX and x <= stockX + CARD_WIDTH and y >= stockY and y <= stockY + CARD_HEIGHT then
-			   if #stock > 0 then
-				   -- Deal top card from stock to waste
-				   local card = table.remove(stock)
-				   card.faceup = true
-				   table.insert(waste, card)
-				   log("Dealt card from stock to waste: " .. (card.rank or "?") .. (card.suit or "?"))
-			   else
-				   -- If stock is empty, recycle waste back to stock (face down, reversed order)
-				   if #waste > 0 then
-					   for i = #waste, 1, -1 do
-						   local card = table.remove(waste, i)
-						   card.faceup = false
-						   table.insert(stock, card)
-					   end
-					   log("Recycled waste back to stock.")
-				   end
-			   end
-			   return
-		   end
+		-- Check if click is on stock pile
+		local stockX, stockY = 40, 40
+		if button == 1 and x >= stockX and x <= stockX + CARD_WIDTH and y >= stockY and y <= stockY + CARD_HEIGHT then
+			if #stock > 0 then
+				-- Deal top card from stock to waste
+				local card = table.remove(stock)
+				card.faceup = true
+				table.insert(waste, card)
+				log("Dealt card from stock to waste: " .. (card.rank or "?") .. (card.suit or "?"))
+			else
+				-- If stock is empty, recycle waste back to stock (face down, reversed order)
+				if #waste > 0 then
+					for i = #waste, 1, -1 do
+						local card = table.remove(waste, i)
+						card.faceup = false
+						table.insert(stock, card)
+					end
+					log("Recycled waste back to stock.")
+				end
+			end
+			return
+		end
 
-		   local card, from, cx, cy = cardAtPosition(x, y)
-		   if card then
-			   dragging = true
-			   draggedCard = card
-			   draggedFrom = from
-			   dragOffsetX = x - cx
-			   dragOffsetY = y - cy
-			   -- If dragging from tableau, collect stack
-			   if from and from.type == "tableau" and from.pile and from.index then
-				   draggedStack = {}
-				   for k = from.index, #tableau[from.pile] do
-					   table.insert(draggedStack, tableau[from.pile][k])
-				   end
-			   else
-				   draggedStack = nil
-			   end
-			   local fromType = from and from.type or "unknown"
-			   local fromPile = (from and from.pile) and (" pile "..from.pile) or ""
-			   log("Started dragging card: " .. (card.rank or "?") .. (card.suit or "?") .. " from " .. fromType .. fromPile)
-		   end
+		local card, from, cx, cy = cardAtPosition(x, y)
+		if card then
+			dragging = true
+			draggedCard = card
+			draggedFrom = from
+			dragOffsetX = x - cx
+			dragOffsetY = y - cy
+			-- If dragging from tableau, collect stack
+			if from and from.type == "tableau" and from.pile and from.index then
+				draggedStack = {}
+				for k = from.index, #tableau[from.pile] do
+					table.insert(draggedStack, tableau[from.pile][k])
+				end
+			else
+				draggedStack = nil
+			end
+			local fromType = from and from.type or "unknown"
+			local fromPile = (from and from.pile) and (" pile "..from.pile) or ""
+			log("Started dragging card: " .. (card.rank or "?") .. (card.suit or "?") .. " from " .. fromType .. fromPile)
+		end
 	end
 end
 
@@ -338,7 +322,6 @@ end
 
 function love.mousemoved(x, y, dx, dy)
     log("Mouse moved to: " .. x .. ", " .. y)
-	love.graphics.print('Hello World!', x, y)
 	if dragging then
 		-- Card position will follow mouseX, mouseY in love.draw
 	end
