@@ -20,6 +20,7 @@ function SolitaireGame:new()
 		dragOffsetY = 0,
 		draggedStack = nil,
 		resetRequested = false,
+		goToMenu = false
     }
 
 	local d = {}
@@ -125,6 +126,14 @@ end
 
 function SolitaireGame:drawEndScreen()
 	love.graphics.printf("Congratulations! You won!", 300, 300, 200, "center")
+
+	
+	love.graphics.rectangle("line", 800, 10, 50, 20)
+	love.graphics.printf("Restart", 805, 10, 50, "left")
+
+	
+	love.graphics.rectangle("line", 800, 60, 50, 20)
+	love.graphics.printf("Menu", 805, 60, 50, "left")
 end
 
 function SolitaireGame:cardAtPosition(mx, my)
@@ -166,6 +175,14 @@ function SolitaireGame:handleMousePressed(x, y, button, istouch, presses)
 		-- restart
 		self.resetRequested = true
 		log("Game restarted. Deck created and dealt.")
+		--self:draw()
+		return
+	end
+
+	if (button == 1) and (x >= 800 and x <= 850 and y >=60 and y <=80) then
+		-- go to menu
+		self.goToMenu = true
+		log("Returning to main menu.")
 		--self:draw()
 		return
 	end

@@ -1,7 +1,7 @@
 local games = {
     { name = "Solitaire", module = require("solitaire/solitaire_game"), x = 50, y = 50 },
-    { name = "Poker", module = require("solitaire/solitaire_game"), x = 50, y = 100 },
-    { name = "Blackjack", module = require("solitaire/solitaire_game"), x = 50, y = 150 },
+   -- { name = "Poker", module = require("solitaire/solitaire_game"), x = 50, y = 100 },
+    --{ name = "Blackjack", module = require("solitaire/solitaire_game"), x = 50, y = 150 },
     -- Add more games here as needed
 }
 
@@ -13,6 +13,17 @@ local function draw()
     end
 end
 
+local function handleMousePressed(x, y, button, istouch, presses)
+    for _, game in ipairs(games) do
+        if x >= game.x and x <= game.x + 100 and y >= game.y and y <= game.y + 20 then
+            -- Start the selected game
+            return game.module:new()
+        end
+    end
+    return nil
+end
+
 return {
-    draw = draw
+    draw = draw,
+    handleMousePressed = handleMousePressed
 }
