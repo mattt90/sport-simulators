@@ -4,6 +4,8 @@ SolitaireGame.__index = SolitaireGame
 local suits = {"S", "H", "D", "C"}
 local ranks = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"}
 local CARD_WIDTH, CARD_HEIGHT = 80, 120
+local logging = require("utils/logging")
+local log = logging.log
 
 function SolitaireGame:new()
     local obj = {
@@ -16,14 +18,15 @@ function SolitaireGame:new()
 		draggedFrom = nil,
 		dragOffsetX = 0,
 		dragOffsetY = 0,
-		draggedStack = nil
+		draggedStack = nil,
+		resetRequested = false,
     }
 
 	local d = {}
 	for _, suit in ipairs(suits) do
 		for _, rank in ipairs(ranks) do
 			local key = rank .. suit
-			local path = "cards/" .. key .. ".png"
+			local path = "assets/cards/" .. key .. ".png"
 			local img = love.graphics.newImage(path)
 			table.insert(d, require("solitaire/card"):new(suit, rank, img))
 		end
@@ -106,6 +109,22 @@ function SolitaireGame:draw()
 			self.draggedCard:draw(mx - self.dragOffsetX, my - self.dragOffsetY)
 		end
 	end
+
+	love.graphics.rectangle("line", 800, 10, 50, 20)
+	love.graphics.printf("Restart", 805, 10, 50, "left")
+end
+
+function SolitaireGame:isGameWon()
+	for i = 1, 4 do
+		if #self.foundations[i] < 13 then
+			return false
+		end
+	end
+	return true
+end
+
+function SolitaireGame:drawEndScreen()
+	love.graphics.printf("Congratulations! You won!", 300, 300, 200, "center")
 end
 
 function SolitaireGame:cardAtPosition(mx, my)
@@ -143,6 +162,14 @@ function SolitaireGame:foundationAtPosition(mx, my)
 end
 
 function SolitaireGame:handleMousePressed(x, y, button, istouch, presses)
+	if (button == 1) and (x >= 800 and x <= 850 and y >=10 and y <=30) then
+		-- restart
+		self.resetRequested = true
+		log("Game restarted. Deck created and dealt.")
+		--self:draw()
+		return
+	end
+
 	if button == 1 and not self.dragging then
 		-- Check if click is on stock pile
 		local stockX, stockY = 40, 40
@@ -183,8 +210,8 @@ function SolitaireGame:handleMousePressed(x, y, button, istouch, presses)
 			else
 				self.draggedStack = nil
 			end
-			local fromType = from and from.type or "unknown"
-			local fromPile = (from and from.pile) and (" pile "..from.pile) or ""
+			--local fromType = from and from.type or "unknown"
+			--local fromPile = (from and from.pile) and (" pile "..from.pile) or ""
 			--log("Started dragging card: " .. (card.rank or "?") .. (card.suit or "?") .. " from " .. fromType .. fromPile)
 		end
 	end
